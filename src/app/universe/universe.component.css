@@ -1,0 +1,126 @@
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #0a0a2a 0%, #000 100%);
+}
+
+.galaxy-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* Music Button Scaling */
+.music-btn {
+  position: absolute;
+  top: 25px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+/* Anniversary UI scaling */
+.anniversary-tag {
+  position: absolute;
+  top: 25px;
+  left: 20px;
+  color: white;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.heart-icon {
+  font-size: 30px;
+  animation: heartbeat 1.2s infinite;
+}
+
+.text-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-text {
+  font-weight: bold;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.journey-label {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Quote Box Scaling */
+.ui-overlay {
+  position: absolute;
+  bottom: 12%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.quote-container {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 18px 35px;
+  border-radius: 40px;
+  border: 1.5px solid rgba(255, 224, 102, 0.4);
+  backdrop-filter: blur(15px);
+  max-width: 85%;
+  animation: floatUp 0.4s ease-out;
+}
+
+.main-text {
+  color: #fff;
+  font-size: 1.2rem;
+  margin: 0;
+  text-align: center;
+  line-height: 1.6;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile Tweak Overrides */
+@media (max-width: 768px) {
+  .date-text {
+    font-size: 1.2rem; /* Even bigger on mobile for clarity */
+  }
+  
+  .main-text {
+    font-size: 1.1rem;
+  }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+@keyframes floatUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

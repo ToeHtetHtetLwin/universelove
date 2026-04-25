@@ -1,0 +1,28 @@
+<div class="galaxy-wrapper" *ngIf="customerData">
+  <div #galaxyContainer class="canvas-container" (click)="playMusic()"></div>
+
+  <button class="music-btn" (click)="toggleMusic($event)" [class.playing]="isPlaying">
+    {{ isPlaying ? '🎵' : '🔇' }}
+  </button>
+
+  <div class="anniversary-tag">
+    <div class="heart-container">
+      <span class="heart-icon">❤️</span>
+    </div>
+    <!-- <div class="text-stack">
+      <span class="date-text">Since {{ customerData.startDate }}</span>
+      <span class="journey-label">Our Special Journey</span>
+    </div> -->
+  </div>
+
+  <div class="ui-overlay" *ngIf="selectedText">
+    <div class="quote-container">
+      <p class="main-text">{{ selectedText }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="loading-screen" *ngIf="!customerData">
+  <div class="loader">✨</div>
+  <p>Building your special universe...</p>
+</div>
