@@ -14,11 +14,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 export class UniverseComponent implements AfterViewInit, OnDestroy {
   @ViewChild('galaxyContainer', { static: false }) containerRef!: ElementRef;
 
+  // Data & UI State
   public customerData: any = null;
   public isPlaying = false;
   public selectedText = "";
   private audio!: HTMLAudioElement;
 
+  // Three.js Core
   private renderer!: THREE.WebGLRenderer;
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -36,8 +38,10 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
 
   async ngAfterViewInit() {
     await this.loadCustomerData();
+    
     if (this.customerData) {
       this.cdr.detectChanges(); 
+
       if (this.containerRef) {
         this.initThree();
         this.addStars();
@@ -60,7 +64,7 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
         this.audio.loop = true;
       }
     } catch (err) {
-      console.error("Data load failed", err);
+      console.error("JSON data loading error:", err);
     }
   }
 
@@ -73,13 +77,12 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
       window.innerWidth / window.innerHeight, 
       0.1, 1000
     );
-    this.camera.position.set(0, 5, isMobile ? 35 : 30);
+    // ကင်မရာကို ပုံတွေနဲ့ အကွာအဝေး အတော်အသင့်မှာ ထားပါမယ်
+    this.camera.position.set(0, 8, isMobile ? 38 : 32);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
-    // အရောင်တွေ ပိုမှန်အောင် colorSpace သတ်မှတ်ပေးခြင်း
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     
     this.containerRef.nativeElement.appendChild(this.renderer.domElement);
@@ -87,14 +90,14 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.autoRotate = true;
-    this.controls.autoRotateSpeed = 0.5;
+    this.controls.autoRotateSpeed = 0.4; // ပိုပြီး ငြိမ့်ငြိမ့်လေး လည်စေဖို့
     this.controls.enablePan = false;
   }
 
   private addStars() {
     const geo = new THREE.BufferGeometry();
     const pos = new Float32Array(5000 * 3);
-    for (let i = 0; i < 5000 * 3; i++) pos[i] = (Math.random() - 0.5) * 120;
+    for (let i = 0; i < 5000 * 3; i++) pos[i] = (Math.random() - 0.5) * 150;
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     const mat = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff });
     this.scene.add(new THREE.Points(geo, mat));
@@ -111,7 +114,7 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
       size: 0.6,
       color: 0xffe066,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.7,
       map: new THREE.TextureLoader().load('/heart.png'),
       blending: THREE.AdditiveBlending
     });
@@ -123,34 +126,40 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
   private addPhotoMeshes() {
     const loader = new THREE.TextureLoader();
     const isMobile = window.innerWidth < 768;
-    const radius = isMobile ? 3.2 : 4.5;
-    const spread = isMobile ? 10 : 16;
+    
+    // ဓာတ်ပုံတစ်ပုံချင်းစီရဲ့ အကျယ်
+    const photoRadius = isMobile ? 3.5 : 4.5;
+    
+    // ဓာတ်ပုံတွေ တန်းစီမယ့် အဝိုင်းကြီးရဲ့ အကျယ် (Ring Size)
+    const ringRadius = isMobile ? 13 : 18; 
 
     this.customerData.photos.forEach((url: string, i: number) => {
       loader.load(url, (tex) => {
-        // --- ORIGINAL COLOR & CLARITY ---
-        // color ကို ဖြုတ်လိုက်ရင် default အတိုင်း လင်းလင်းချင်းချင်း ဖြစ်သွားပါမယ်။
-        // colorSpace ကို sRGB ပြောင်းပေးတာက အရောင်ပိုကြည်စေပါတယ်။
         tex.colorSpace = THREE.SRGBColorSpace;
 
         const material = new THREE.MeshBasicMaterial({ 
           map: tex, 
           side: THREE.DoubleSide, 
           transparent: true,
-          color: 0xffffff // Full Brightness (Original Color)
+          color: 0xffffff 
         });
 
         const mesh = new THREE.Mesh(
-          new THREE.CircleGeometry(radius, 32),
+          new THREE.CircleGeometry(photoRadius, 32),
           material
         );
 
+        // --- CIRCULAR ALGORITHM ---
+        // ဓာတ်ပုံအရေအတွက်အလိုက် အကွာအဝေးကို ညီအောင် တွက်တာပါ
         const angle = (i / this.customerData.photos.length) * Math.PI * 2;
+        
         mesh.position.set(
-          Math.cos(angle) * spread,
-          (Math.random() - 0.5) * (isMobile ? 6 : 12),
-          Math.sin(angle) * spread
+          Math.cos(angle) * ringRadius,
+          0, // Randomization မသုံးတော့ဘဲ တစ်တန်းတည်း ထားလိုက်တာပါ
+          Math.sin(angle) * ringRadius
         );
+        // -------------------------
+
         this.photoMeshes.push(mesh);
         this.scene.add(mesh);
       });
@@ -170,7 +179,7 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
     if (intersects.length > 0) {
       this.selectedMesh = intersects[0].object as THREE.Mesh;
       const index = this.photoMeshes.indexOf(this.selectedMesh);
-      this.selectedText = this.customerData.quotes[index] || "Love Forever ❤️";
+      this.selectedText = this.customerData.quotes[index] || "Forever ❤️";
     } else {
       this.selectedMesh = null;
       this.selectedText = "";
@@ -208,12 +217,14 @@ export class UniverseComponent implements AfterViewInit, OnDestroy {
 
         this.photoMeshes.forEach((mesh, index) => {
           mesh.lookAt(this.camera.position);
+          
           if (mesh === this.selectedMesh) {
-            const pulse = 1.25 + Math.sin(time * 5) * 0.05;
+            const pulse = 1.2 + Math.sin(time * 5) * 0.05;
             mesh.scale.set(pulse, pulse, pulse);
           } else {
             mesh.scale.set(1, 1, 1);
-            mesh.position.y += Math.sin(time + index) * 0.01;
+            // Floating effect ငြိမ့်ငြိမ့်လေးပဲ ထားထားပါတယ်
+            mesh.position.y = Math.sin(time + index) * 0.8;
           }
         });
 
